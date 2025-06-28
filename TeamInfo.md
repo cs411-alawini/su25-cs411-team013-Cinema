@@ -1,4 +1,4 @@
-# Team013-College Major Explorer
+# Team013-Cinema
 
 ## Basic Information
 
