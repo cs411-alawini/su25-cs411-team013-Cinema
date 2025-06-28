@@ -24,6 +24,8 @@ The College Majors dataset on Kaggle shows three years of American survey data i
 
 ## Functionality:
 Users of our platform will be able to explore and compare different majors that are aligned with their interests through the data that we provide. They can search for majors or filter by their preferences such as categories or growth rates or salary. A graph will then show the data information to the user. They can then save and compare different majors. 
-
+<div align="center">
+  <img src="./interface_mockup.png" width="500" alt="College Major Explorer Interface">
+</div>
 ## Task distribution:
 It is hard to distribute work at this stage of the project since we don't know exactly what all the tasks will look like, however the broad idea is that we will all work on the back end together since that's the main purpose of the class. Antoni and Shrikar will work on front end, Shengwen will ensure that front and back end will work together and Artha will be responsible for finding data sets.
