@@ -27,5 +27,6 @@ Users of our platform will be able to explore and compare different majors that 
 <div align="center">
   <img src="./interface_mockup.png" width="500" alt="College Major Explorer Interface">
 </div>
+
 ## Task distribution:
 It is hard to distribute work at this stage of the project since we don't know exactly what all the tasks will look like, however the broad idea is that we will all work on the back end together since that's the main purpose of the class. Antoni and Shrikar will work on front end, Shengwen will ensure that front and back end will work together and Artha will be responsible for finding data sets.
