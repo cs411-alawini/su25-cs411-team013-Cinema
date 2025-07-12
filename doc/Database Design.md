@@ -10,47 +10,25 @@
 
 *In designing this database, our guiding principle was that any concept with its own distinct attributes that is referenced multiple times should be its own table. This approach ensures data integrity and reduces redundancy, aligning with the principles of database normalization.*
 
-### **User**
+### Entity Descriptions
 
-The `User` entity stores credentials and account information. It's the core entity for tracking user activity, such as which majors they choose to save for comparison.
+  * **User**: Stores credentials and account information. It's the core entity for tracking user activity, such as which majors they choose to save for comparison.
+  * **InterestArea**: Acts as a lookup table for categories, preventing the need to repeat text values within the `Major` table. This is used to filter majors by subject area.
+  * **UserInterestArea**: A **junction table** that resolves the many-to-many relationship between `User` and `InterestArea`, allowing a user to follow or select multiple areas of interest.
+  * **Major**: Stores the details for each academic major, such as its name and description.
+  * **DataSource**: Stores information about the external sources from which we get our data (e.g., Bureau of Labor Statistics).
+  * **MajorStatistic**: Stores the yearly figures for each major (e.g., average salary, graduation count). Making this its own table avoids having repeating columns in the `Major` table.
+  * **SavedComparison**: A **junction table** that resolves the many-to-many relationship between `User` and `Major`. It also stores a timestamp to track when the comparison was saved.
 
-  * **Relationships**: A `User` can save many `Major`s, and a `Major` can be saved by many `User`s. This many-to-many relationship is resolved through the `SavedComparison` junction table. A user can also select many `InterestArea`s through the `UserInterestArea` table.
+### **Relationship Descriptions**
 
-### **InterestArea**
+*This section explicitly details each relationship and its cardinality as shown in the ER Diagram*
 
-The `InterestArea` entity acts as a lookup table for categories, preventing the need to repeat text values within the `Major` table. This is used to filter majors by subject area.
-
-  * **Relationships**: An `InterestArea` can categorize many `Major`s in a one-to-many relationship. Each `Major` belongs to just one `InterestArea`.
-
-### **UserInterestArea**
-
-This is a **junction table** that resolves the many-to-many relationship between `User` and `InterestArea`, allowing a user to follow or select multiple areas of interest.
-
-  * **Relationships**: It links one `User` to one `InterestArea` per row, storing a timestamp of when the selection was made.
-
-### **Major**
-
-The `Major` entity stores the details for each academic major, such as its name and description.
-
-  * **Relationships**: It has a many-to-one relationship with `InterestArea` and a one-to-many relationship with `MajorStatistic`.
-
-### **DataSource**
-
-The `DataSource` entity stores information about the external sources from which we get our data (e.g., Bureau of Labor Statistics).
-
-  * **Relationships**: A `DataSource` can provide many `MajorStatistic` records in a one-to-many relationship.
-
-### **MajorStatistic**
-
-The `MajorStatistic` entity stores the yearly figures for each major (e.g., average salary, graduation count). Making this its own table avoids having repeating columns in the `Major` table.
-
-  * **Relationships**: Each `MajorStatistic` record pertains to exactly one `Major` and comes from one `DataSource`.
-
-### **SavedComparison**
-
-This is a **junction table** that resolves the many-to-many relationship between `User` and `Major`. It also stores a timestamp to track when the comparison was saved.
-
-  * **Relationships**: It links one `User` to one `Major` per row.
+  * **selects / is selected by**: A one-to-many relationship between `User` and the `UserInterestArea` table. One user can select many interest areas.
+  * **saves / is saved in**: A one-to-many relationship between `User` and the `SavedComparison` table. One user can save many major comparisons.
+  * **categorizes**: A one-to-many relationship from `InterestArea` to `Major`. One interest area can categorize multiple majors, but each major belongs to only one interest area.
+  * **has stats**: A one-to-many relationship from `Major` to `MajorStats`. One major can have many different statistical records (e.g., for different years or from different sources).
+  * **provides**: A one-to-many relationship from `DataSource` to `MajorStats`. One data source can provide the statistics for many records.
 
 -----
 
@@ -147,4 +125,5 @@ SavedComparison(
 ### **SavedComparison**
 
   * **Primary Key**: (`user_id`, `major_id`)
+  * **Analysis**: This junction table is in BCNF. Its only non-key attribute, `saved_at`, is fully dependent on the entire composite primary key.
   * **Analysis**: This junction table is in BCNF. Its only non-key attribute, `saved_at`, is fully dependent on the entire composite primary key.
