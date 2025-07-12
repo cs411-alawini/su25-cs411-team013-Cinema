@@ -2,7 +2,7 @@
 
 ## 1\. ER Diagram
 
-![Your ER Diagram](su25-cs411-team013-Cinema/doc/ERD.png)
+![ER Diagram](ERD.png)
 
 -----
 
