@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>College Major Explorer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+      background-color: #f8f9fa;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .auth-form {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      min-width: 300px;
+    }
+    
+    .auth-form h2 {
+      margin-top: 0;
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #495057;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e9ecef;
+      border-radius: 5px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+      box-sizing: border-box;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+    
+    .form-group input.error {
+      border-color: #dc3545;
+    }
+    
+    .error-message {
+      color: #dc3545;
+      font-size: 12px;
+      margin-top: 5px;
+      display: none;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .btn-primary {
+      background-color: #007bff;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+    
+    .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #545b62;
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .toggle-form {
+      text-align: center;
+      margin-top: 15px;
+    }
+    
+    .toggle-form a {
+      color: #007bff;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    
+    .toggle-form a:hover {
+      text-decoration: underline;
+    }
+    
+    .user-info {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      display: none;
+    }
+    
+    .user-info h3 {
+      margin: 0 0 10px 0;
+      color: #2c3e50;
+    }
+    
+    .logout-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .logout-btn:hover {
+      background-color: #c82333;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .controls label {
+      font-weight: bold;
+      margin-right: 5px;
+      color: #495057;
+    }
+    
+    .controls select,
+    .controls input[type="range"] {
+      padding: 8px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+    }
+    
+    canvas {
+      width: 100% !important;
+      height: 500px !important;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .main-content {
+      display: none;
+    }
+    
+    .password-strength {
+      margin-top: 5px;
+      font-size: 12px;
+    }
+    
+    .strength-weak { color: #dc3545; }
+    .strength-medium { color: #ffc107; }
+    .strength-strong { color: #28a745; }
+  </style>
+</head>
+<body>
+  <div class="header">
+  <h1>College Major Explorer</h1>
+    <p>Discover and compare college majors based on salary, growth, and your interests</p>
+  </div>
+
+  <!-- Authentication Forms -->
+  <div class="auth-container" id="authContainer">
+    <!-- Login Form -->
+    <div class="auth-form" id="loginForm">
+      <h2>Login</h2>
+      <form id="loginFormElement">
+        <div class="form-group">
+          <label for="loginUsername">Username or Email:</label>
+          <input type="text" id="loginUsername" required>
+          <div class="error-message" id="loginUsernameError"></div>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password:</label>
+          <input type="password" id="loginPassword" required>
+          <div class="error-message" id="loginPasswordError"></div>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+      <div class="toggle-form">
+        <a onclick="toggleForms()">Don't have an account? Sign up</a>
+      </div>
+    </div>
+
+    <!-- Sign Up Form -->
+    <div class="auth-form" id="signupForm" style="display: none;">
+      <h2>Sign Up</h2>
+      <form id="signupFormElement">
+        <div class="form-group">
+          <label for="signupUsername">Username:</label>
+          <input type="text" id="signupUsername" required>
+          <div class="error-message" id="signupUsernameError"></div>
+        </div>
+        <div class="form-group">
+          <label for="signupEmail">Email:</label>
+          <input type="email" id="signupEmail" required>
+          <div class="error-message" id="signupEmailError"></div>
+        </div>
+        <div class="form-group">
+          <label for="signupPassword">Password:</label>
+          <input type="password" id="signupPassword" required>
+          <div class="password-strength" id="passwordStrength"></div>
+          <div class="error-message" id="signupPasswordError"></div>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password:</label>
+          <input type="password" id="confirmPassword" required>
+          <div class="error-message" id="confirmPasswordError"></div>
+        </div>
+        <div class="form-group">
+          <div class="error-message" id="signupGeneralError" style="text-align: center; font-weight: bold;"></div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="signupSubmitBtn">Sign Up</button>
+      </form>
+      <div class="toggle-form">
+        <a onclick="toggleForms()">Already have an account? Login</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Info -->
+  <div class="user-info" id="userInfo">
+    <h3>Welcome, <span id="userDisplayName"></span>!</h3>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- Main Application Content -->
+  <div class="main-content" id="mainContent">
+  <div class="controls">
+    <div>
+      <label for="interestArea">Interest Area:</label>
+      <select id="interestArea" disabled>
+        <option>Loading…</option>
+      </select>
+    </div>
+    
+    <div>
+      <label for="searchInterestArea">Search Interest Area:</label>
+      <div style="position: relative;">
+        <input type="text" id="searchInterestArea" placeholder="Type to search..." style="width: 200px; padding: 8px; border: 1px solid #ced4da; border-radius: 4px;">
+        <div id="searchResults" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ced4da; border-top: none; border-radius: 0 0 4px 4px; max-height: 200px; overflow-y: auto; z-index: 1000; display: none;"></div>
+      </div>
+    </div>
+
+    <div>
+      <label for="minSalary">Min Salary: <span id="salaryValue">20,000</span></label><br/>
+      <input type="range" id="minSalary" min="20000" max="180000" step="1000" value="20000">
+    </div>
+
+    <div>
+        <label for="minGrowth">Min Growth %: <span id="growthValue">0.0</span></label><br/>
+      <input type="range" id="minGrowth" min="0" max="25" step="0.1" value="0">
+    </div>
+
+    <div>
+      <button id="applyFilters" disabled>Apply Filters</button>
+      <button id="saveComparison" disabled>Save Comparison</button>
+    </div>
+  </div>
+
+  <canvas id="chart"></canvas>
+
+    <!-- Saved Comparisons Section -->
+    <div id="savedComparisonsSection" style="margin-top: 30px; display: none;">
+      <h2>My Saved Comparisons</h2>
+      <div id="savedComparisonsContainer">
+        <p>Loading saved comparisons...</p>
+    </div>
+    </div>
+  </div>
+
+  <script>
+    let chart, selectedMajors = [];
+    let currentUser = null;
+
+    // Authentication functions
+    function toggleForms() {
+      const loginForm = document.getElementById('loginForm');
+      const signupForm = document.getElementById('signupForm');
+      
+      if (loginForm.style.display === 'none') {
+        loginForm.style.display = 'block';
+        signupForm.style.display = 'none';
+      } else {
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'block';
+      }
+    }
+
+    function showError(elementId, message) {
+      const element = document.getElementById(elementId);
+      const errorDiv = document.getElementById(elementId + 'Error');
+      element.classList.add('error');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
+
+    function clearError(elementId) {
+      const element = document.getElementById(elementId);
+      const errorDiv = document.getElementById(elementId + 'Error');
+      element.classList.remove('error');
+      errorDiv.style.display = 'none';
+    }
+
+    function checkPasswordStrength(password) {
+      const strengthDiv = document.getElementById('passwordStrength');
+      let strength = 0;
+      let message = '';
+      let className = '';
+
+      if (password.length >= 8) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[a-z]/.test(password)) strength++;
+      if (/\d/.test(password)) strength++;
+
+      if (strength < 2) {
+        message = 'Weak password';
+        className = 'strength-weak';
+      } else if (strength < 4) {
+        message = 'Medium strength password';
+        className = 'strength-medium';
+      } else {
+        message = 'Strong password';
+        className = 'strength-strong';
+      }
+
+      strengthDiv.textContent = message;
+      strengthDiv.className = 'password-strength ' + className;
+    }
+
+    // Sign up functionality
+    document.getElementById('signupFormElement').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Clear previous errors
+      ['signupUsername', 'signupEmail', 'signupPassword', 'confirmPassword'].forEach(clearError);
+      clearGeneralError();
+      
+      const username = document.getElementById('signupUsername').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      // Validation
+      if (username.length < 3) {
+        showError('signupUsername', 'Username must be at least 3 characters long');
+        return;
+      }
+      
+      if (!email.includes('@')) {
+        showError('signupEmail', 'Please enter a valid email address');
+        return;
+      }
+      
+      if (password.length < 8) {
+        showError('signupPassword', 'Password must be at least 8 characters long');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showError('confirmPassword', 'Passwords do not match');
+        return;
+      }
+      
+      // Disable submit button and show loading state
+      const submitBtn = document.getElementById('signupSubmitBtn');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating Account...';
+      
+      try {
+        console.log('Attempting to sign up user:', username);
+        
+        const response = await fetch('http://127.0.0.1:5000/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: username,
+            email: email,
+            password: password,
+            confirm_password: confirmPassword
+          })
+        });
+        
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        if (response.ok) {
+          showToast(data.message, 'success');
+          // Clear form and switch to login
+          document.getElementById('signupFormElement').reset();
+          toggleForms();
+        } else {
+          // Handle specific error cases
+          if (data.error === 'Username or email already taken') {
+            showGeneralError('Username or email already taken. Please choose different credentials.');
+          } else {
+            showGeneralError(data.error || 'An error occurred during signup.');
+          }
+        }
+      } catch (error) {
+        console.error('Signup error:', error);
+        showGeneralError('Network error. Please check your connection and try again.');
+      } finally {
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
+
+    function showGeneralError(message) {
+      const errorDiv = document.getElementById('signupGeneralError');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      errorDiv.style.color = '#e74c3c';
+    }
+
+    function clearGeneralError() {
+      const errorDiv = document.getElementById('signupGeneralError');
+      errorDiv.style.display = 'none';
+      errorDiv.textContent = '';
+    }
+
+    // Login functionality
+    document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const usernameOrEmail = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      
+      try {
+        const response = await fetch('http://127.0.0.1:5000/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username_or_email: usernameOrEmail,
+            password: password
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          currentUser = data.user_id;
+          document.getElementById('userDisplayName').textContent = data.username;
+          document.getElementById('authContainer').style.display = 'none';
+          document.getElementById('userInfo').style.display = 'block';
+          document.getElementById('mainContent').style.display = 'block';
+          document.getElementById('savedComparisonsSection').style.display = 'block';
+          
+          // Load user data
+          fetchInterestAreas();
+          loadSavedComparisons();
+        } else {
+          showToast('Login failed: ' + data.error, 'error');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        showToast('An error occurred during login. Please try again.', 'error');
+      }
+    });
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('authContainer').style.display = 'flex';
+      document.getElementById('userInfo').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'none';
+      document.getElementById('loginFormElement').reset();
+      document.getElementById('signupFormElement').reset();
+    }
+
+    // Password strength checker
+    document.getElementById('signupPassword').addEventListener('input', (e) => {
+      checkPasswordStrength(e.target.value);
+    });
+
+    async function fetchInterestAreas() {
+      const sel = document.getElementById('interestArea');
+      try {
+        const res = await fetch('http://127.0.0.1:5000/interest-areas');
+        const areas = await res.json();
+        sel.innerHTML = '<option value="">— Select —</option>';
+        areas.forEach(a => {
+          const o = document.createElement('option');
+          o.value = a.interest_area_id;
+          o.textContent = a.name;
+          sel.appendChild(o);
+        });
+        sel.disabled = false;
+        document.getElementById('applyFilters').disabled = false;
+      } catch(err) {
+        console.error(err);
+        sel.innerHTML = '<option>Error loading</option>';
+      }
+    }
+
+    // Search interest areas functionality
+    let searchTimeout;
+    let allInterestAreas = [];
+
+    async function searchInterestAreas(query) {
+      if (!query.trim()) {
+        hideSearchResults();
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://127.0.0.1:5000/search-interest-areas?q=${encodeURIComponent(query)}`);
+        const results = await res.json();
+        
+        if (res.ok) {
+          displaySearchResults(results, query);
+        } else {
+          console.error('Search error:', results.error);
+          showNoResults();
+        }
+      } catch (err) {
+        console.error('Search error:', err);
+        showNoResults();
+      }
+    }
+
+    function displaySearchResults(results, query) {
+      const container = document.getElementById('searchResults');
+      
+      if (results.length === 0) {
+        showNoResults();
+        return;
+      }
+
+      const resultsHtml = results.map(area => {
+        const highlightedName = highlightMatch(area.name, query);
+        return `
+          <div class="search-result-item" 
+               onclick="selectSearchResult(${area.interest_area_id}, '${area.name}')"
+               style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; hover: background-color: #f8f9fa;">
+            ${highlightedName}
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = resultsHtml;
+      container.style.display = 'block';
+    }
+
+    function highlightMatch(text, query) {
+      if (!query) return text;
+      
+      const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return text.replace(regex, '<strong style="background-color: #fff3cd;">$1</strong>');
+    }
+
+    function showNoResults() {
+      const container = document.getElementById('searchResults');
+      container.innerHTML = '<div style="padding: 8px 12px; color: #6c757d; font-style: italic;">No matches found</div>';
+      container.style.display = 'block';
+    }
+
+    function hideSearchResults() {
+      const container = document.getElementById('searchResults');
+      container.style.display = 'none';
+    }
+
+    function selectSearchResult(interestAreaId, interestAreaName) {
+      // Set the main dropdown
+      const dropdown = document.getElementById('interestArea');
+      dropdown.value = interestAreaId;
+      
+      // Clear the search input
+      document.getElementById('searchInterestArea').value = '';
+      
+      // Hide search results
+      hideSearchResults();
+      
+      // Trigger change event on dropdown
+      dropdown.dispatchEvent(new Event('change'));
+    }
+
+    // Handle search input events
+    document.getElementById('searchInterestArea').addEventListener('input', (e) => {
+      const query = e.target.value;
+      
+      // Clear previous timeout
+      clearTimeout(searchTimeout);
+      
+      // Set new timeout for debouncing
+      searchTimeout = setTimeout(() => {
+        searchInterestAreas(query);
+      }, 300);
+    });
+
+    // Handle Enter key in search input
+    document.getElementById('searchInterestArea').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const results = document.querySelectorAll('.search-result-item');
+        if (results.length > 0) {
+          results[0].click();
+        }
+      }
+    });
+
+    // Hide search results when clicking outside
+    document.addEventListener('click', (e) => {
+      const searchContainer = document.getElementById('searchInterestArea').parentElement;
+      if (!searchContainer.contains(e.target)) {
+        hideSearchResults();
+      }
+    });
+
+    // Draw bubble chart
+    function updateChart(data) {
+      const ctx = document.getElementById('chart').getContext('2d');
+      if(chart) chart.destroy();
+
+      // Reset selected majors when chart updates
+      selectedMajors = [];
+      document.getElementById('saveComparison').disabled = true;
+
+      chart = new Chart(ctx, {
+        type: 'bubble',
+        data: {
+          datasets: data.map((d, index) => ({
+            label: d.major_name,
+            data: [{ x: d.average_salary, y: d.job_growth_rate, r: Math.sqrt(d.grads)/5 }],
+            backgroundColor: 'rgba(54,162,235,0.5)',
+            borderColor: 'rgba(54,162,235,1)',
+            borderWidth: 1,
+            majorId: d.major_id, // Store major_id for click handling
+            majorName: d.major_name
+          }))
+        },
+        options: {
+          responsive: true,
+          onClick: (event, elements) => {
+            if (elements.length > 0) {
+              const datasetIndex = elements[0].datasetIndex;
+              const majorId = chart.data.datasets[datasetIndex].majorId;
+              const majorName = chart.data.datasets[datasetIndex].majorName;
+              
+              // Toggle selection
+              const index = selectedMajors.indexOf(majorId);
+              if (index > -1) {
+                // Remove from selection
+                selectedMajors.splice(index, 1);
+                chart.data.datasets[datasetIndex].backgroundColor = 'rgba(54,162,235,0.5)';
+                chart.data.datasets[datasetIndex].borderColor = 'rgba(54,162,235,1)';
+              } else {
+                // Add to selection
+                selectedMajors.push(majorId);
+                chart.data.datasets[datasetIndex].backgroundColor = 'rgba(255,99,132,0.7)';
+                chart.data.datasets[datasetIndex].borderColor = 'rgba(255,99,132,1)';
+              }
+              
+              // Update save button state
+              document.getElementById('saveComparison').disabled = selectedMajors.length === 0;
+              
+              // Update chart
+              chart.update();
+              
+              // Show selection feedback
+              console.log(`Selected majors: ${selectedMajors.length}`, selectedMajors);
+            }
+          },
+          scales: {
+            x: {
+              title: { display: true, text: 'Average Salary ($)' },
+              min: 20000, max: 180000
+            },
+            y: {
+              title: { display: true, text: 'Job Growth Rate (%)' },
+              min: 0, max: 25
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.dataset.label}: $${ctx.raw.x}, ${ctx.raw.y}%`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Wire up sliders
+    const salary = document.getElementById('minSalary'),
+          growth = document.getElementById('minGrowth'),
+          salaryVal = document.getElementById('salaryValue'),
+          growthVal = document.getElementById('growthValue');
+
+    salary.addEventListener('input', e => salaryVal.textContent = Number(e.target.value).toLocaleString());
+    growth.addEventListener('input', e => growthVal.textContent = parseFloat(e.target.value).toFixed(1));
+
+    // Apply filters
+    document.getElementById('applyFilters').addEventListener('click', async () => {
+      const areaId = document.getElementById('interestArea').value;
+      const minSal = +salary.value, minG = +growth.value;
+      if (!areaId) return alert('Please select an interest area.');
+
+      try {
+        const res = await fetch('http://127.0.0.1:5000/majors');
+        const majors = await res.json();
+        const filtered = majors.filter(m =>
+          m.interest_area_id == areaId &&
+          m.average_salary >= minSal &&
+          m.job_growth_rate >= minG
+        );
+        updateChart(filtered);
+      } catch(err) {
+        console.error(err);
+        alert('Error loading majors.');
+      }
+    });
+
+    // Save comparison
+    document.getElementById('saveComparison').addEventListener('click', async () => {
+      if (!selectedMajors.length) return;
+      if (!currentUser) {
+        alert('Please login first to save comparisons.');
+        return;
+      }
+      
+      try {
+        const res = await fetch('http://127.0.0.1:5000/save-comparison', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: currentUser, major_ids: selectedMajors })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          showToast(data.message, 'success');
+          // Refresh saved comparisons list
+          loadSavedComparisons();
+        } else {
+          // Check if it's a duplicate comparison error from the MySQL trigger
+          if (data.error && data.error.includes('Comparison already saved')) {
+            console.warn('MySQL trigger prevented duplicate save:', data.error);
+            showToast('Already saved — this major is in your comparisons.', 'info');
+          } else {
+            showToast('Error: ' + data.error, 'error');
+          }
+        }
+      } catch(err) {
+        console.error('Error saving comparison:', err);
+        showToast('Error saving comparison.', 'error');
+      }
+    });
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+      // Remove existing toast if any
+      const existingToast = document.getElementById('toast-notification');
+      if (existingToast) {
+        existingToast.remove();
+      }
+
+      // Create toast element
+      const toast = document.createElement('div');
+      toast.id = 'toast-notification';
+      toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 6px;
+        color: white;
+        font-size: 14px;
+        font-weight: 500;
+        z-index: 10000;
+        max-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        transform: translateX(100%);
+        opacity: 0;
+      `;
+
+      // Set background color based on type
+      switch(type) {
+        case 'success':
+          toast.style.backgroundColor = '#27ae60';
+          break;
+        case 'error':
+          toast.style.backgroundColor = '#e74c3c';
+          break;
+        case 'info':
+        default:
+          toast.style.backgroundColor = '#3498db';
+          break;
+      }
+
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      // Animate in
+      setTimeout(() => {
+        toast.style.transform = 'translateX(0)';
+        toast.style.opacity = '1';
+      }, 10);
+
+      // Auto remove after 4 seconds
+      setTimeout(() => {
+        toast.style.transform = 'translateX(100%)';
+        toast.style.opacity = '0';
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.remove();
+          }
+        }, 300);
+      }, 4000);
+    }
+
+    // Load saved comparisons
+    async function loadSavedComparisons() {
+      if (!currentUser) return;
+      
+      try {
+        const res = await fetch(`http://127.0.0.1:5000/saved-comparisons/${currentUser}`);
+        const data = await res.json();
+        
+        if (res.ok) {
+          displaySavedComparisons(data.saved_comparisons);
+        } else {
+          console.error('Error loading saved comparisons:', data.error);
+        }
+      } catch (err) {
+        console.error('Error loading saved comparisons:', err);
+      }
+    }
+
+    // Display saved comparisons
+    function displaySavedComparisons(comparisons) {
+      const container = document.getElementById('savedComparisonsContainer');
+      
+      if (comparisons.length === 0) {
+        container.innerHTML = '<p>No saved comparisons yet. Select majors and click "Save Comparison" to save them here.</p>';
+        return;
+      }
+
+      container.innerHTML = comparisons.map(comp => `
+        <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 4px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="font-size: 16px; color: #2c3e50;">${comp.major_name}</strong><br>
+              <small style="color: #7f8c8d;">
+                ${comp.avg_salary ? `Average Salary: $${Math.round(comp.avg_salary).toLocaleString()}` : 'Salary data not available'}
+                ${comp.job_count ? ` (${comp.job_count} job entries)` : ''}
+              </small><br>
+              <small style="color: #95a5a6;">
+                Saved: ${new Date(comp.saved_at).toLocaleDateString()} at ${new Date(comp.saved_at).toLocaleTimeString()}
+              </small>
+            </div>
+            <div>
+              <button onclick="viewMajorJobs(${comp.major_id}, '${comp.major_name}')" 
+                      style="background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px;">
+                View Jobs
+              </button>
+              <button onclick="removeSavedComparison(${comp.major_id})" 
+                      style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // View individual jobs for a major
+    async function viewMajorJobs(majorId, majorName) {
+      try {
+        const res = await fetch(`http://127.0.0.1:5000/major-jobs/${majorId}`);
+        const data = await res.json();
+        
+        if (res.ok) {
+          displayMajorJobs(data);
+        } else {
+          showToast('Error: ' + data.error, 'error');
+        }
+      } catch (err) {
+        console.error('Error loading major jobs:', err);
+        showToast('Error loading job details.', 'error');
+      }
+    }
+
+    // Display individual jobs for a major
+    function displayMajorJobs(data) {
+      const container = document.getElementById('savedComparisonsContainer');
+      
+      if (data.jobs.length === 0) {
+        container.innerHTML = `<p>No job data available for ${data.major_name}.</p>`;
+        return;
+      }
+
+      const jobsHtml = data.jobs.map(job => `
+        <div style="border: 1px solid #e0e0e0; padding: 12px; margin: 8px 0; border-radius: 4px; background: #f9f9f9;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: #2c3e50;">$${job.avg_salary.toLocaleString()}</strong><br>
+              <small style="color: #7f8c8d;">
+                Growth: ${job.job_growth_rate}% | Grads: ${job.grad_count.toLocaleString()} | Year: ${job.year}
+              </small>
+              ${job.source_name ? `<br><small style="color: #95a5a6;">Source: ${job.source_name}</small>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div style="margin-bottom: 20px;">
+          <button onclick="loadSavedComparisons()" 
+                  style="background: #95a5a6; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-bottom: 10px;">
+            ← Back to Saved Comparisons
+          </button>
+          <h3 style="color: #2c3e50; margin: 0;">${data.major_name} - Individual Job Entries (${data.count})</h3>
+        </div>
+        ${jobsHtml}
+      `;
+    }
+
+    // Remove saved comparison (optional feature)
+    async function removeSavedComparison(majorId) {
+      if (!currentUser) return;
+      
+      if (!confirm('Are you sure you want to remove this comparison?')) return;
+      
+      try {
+        const res = await fetch(`http://127.0.0.1:5000/saved-comparisons/${currentUser}/${majorId}`, {
+          method: 'DELETE'
+        });
+        
+        if (res.ok) {
+          showToast('Comparison removed successfully!', 'success');
+          loadSavedComparisons(); // Refresh the list
+        } else {
+          const data = await res.json();
+          showToast('Error: ' + data.error, 'error');
+        }
+      } catch (err) {
+        console.error('Error removing comparison:', err);
+        showToast('Error removing comparison.', 'error');
+      }
+    }
+
+    // Legacy login function (kept for compatibility)
+    async function login(userId) {
+      try {
+        const res = await fetch('http://127.0.0.1:5000/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          currentUser = userId;
+          document.getElementById('submissionsSection').style.display = 'block';
+          loadUserSubmissions();
+          alert('Login successful!');
+        } else {
+          alert('Login failed: ' + data.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Login error');
+      }
+    }
+
+
+
+    // Remove old user ID functionality since we have proper authentication now
+
+
+
+    // Init
+    fetchInterestAreas();
+    populateJobInterestAreas();
+  </script>
+</body>
+</html>
